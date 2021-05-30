@@ -1,4 +1,11 @@
 # python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/COCO_R50_epoch_1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/ALL_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/ALL_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C5S5_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C5S5_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C1S1_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+
 # https://towardsdatascience.com/how-to-tune-hyperparameters-of-tsne-7c0596a18868
 import argparse
 from re import L
@@ -153,6 +160,7 @@ if __name__ == "__main__":
                 label = cocoGt.loadCats(ids=[ann["category_id"]])[0]["name"]
                 labels.append(label)
         labels_unique = list(set(labels))
+        labels_unique.sort()
         labels_dict = {label : idx for idx, label in enumerate(labels_unique)}
         labels_legend = [label for label in labels_unique]
         labels_int = [labels_dict[label] for label in labels]
