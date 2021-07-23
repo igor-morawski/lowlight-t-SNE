@@ -1,14 +1,32 @@
 # python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/COCO_R50_epoch_1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
-# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/ALL_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
-# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/ALL_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_APUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_PURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_APURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
 
-# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C5S5_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
-# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C5S5_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
-# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/C1S1_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/COCO_R50_epoch_1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_PUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_APUR50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_PURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/Ablation_S_APURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats
 
-# https://towardsdatascience.com/how-to-tune-hyperparameters-of-tsne-7c0596a18868
+
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/TEMP_C1S1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme
+
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/COCO_R50_epoch_1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne_small --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features_small/Ablation_S_R50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne_small --binary_label=isextreme
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features_small/Ablation_S_APURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne_small --binary_label=isextreme 
+
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/A_APURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme 
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/A_APURS50.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --cats 
+
+# python tsne.py /tmp2/igor/lowlight-t-SNE/Sony_features/COCO_R50_epoch_1.pth.pkl --json=str_labeled_new_Sony_RX100m7_test.json --output_dir=tsne --binary_label=isextreme --mark_images=8.jpg,109.jpg,83.jpg,332.jpg,63.jpg --markers=X,^,o,P,D
 import argparse
+import enum
 from re import L
+from numpy.lib.function_base import select
 import tqdm
 from PIL import Image
 import glob
@@ -16,6 +34,7 @@ import os
 import os.path as op
 import pickle
 import tqdm
+import copy
 
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as PathEffects
@@ -33,6 +52,8 @@ import seaborn as sns
 from pycocotools.coco import COCO
 import json
 
+SONY_AREA_NAMES = ["all", "small", "medium", "large"]
+SONY_AREA_RNG = [[0, 1e5 ** 2], [0, 10**4.8], [10**4.8, 10**5.8], [10**5.8, 1e8]]
 TSNE_DEFAULT = {"n_iter" : 3*5000, "random_state" : 3}
 
 def scatter(x, colors, cats, alpha=1):
@@ -46,8 +67,9 @@ def scatter(x, colors, cats, alpha=1):
     ax = plt.subplot(aspect='equal')
     sc = ax.scatter(x[:,0], x[:,1], lw=0, s=40,
                     c=palette[colors.astype(np.int)])
-    plt.xlim(-25, 25)
-    plt.ylim(-25, 25)
+    # plt.xlim(-25, 25)
+    # plt.ylim(-25, 25)
+
     ax.axis('off')
     ax.axis('tight')
 
@@ -56,7 +78,7 @@ def scatter(x, colors, cats, alpha=1):
     for i in range(len(cats)):
         # Position of each label.
         xtext, ytext = np.median(x[colors == i, :], axis=0)
-        txt = ax.text(xtext, ytext, str(i), fontsize=24)
+        txt = ax.text(xtext, ytext, str(i), fontsize="xx-large")
         txt.set_path_effects([
             PathEffects.Stroke(linewidth=5, foreground="w"),
             PathEffects.Normal()])
@@ -66,7 +88,7 @@ def scatter(x, colors, cats, alpha=1):
     legend_elements = [Line2D([0], [0], marker='o', color=palette[i], label="{}, ({})".format(cats[i], i),
                           markerfacecolor=palette[i], markersize=15) for i in range(len(cats))]
 
-    ax.legend(handles=legend_elements, loc='lower right')
+    ax.legend(handles=legend_elements, bbox_to_anchor=(0,0), loc="lower left", fontsize="xx-large", bbox_transform=f.transFigure)
     return f, ax, sc, txts
 
 def read_pickle(args):
@@ -101,6 +123,9 @@ if __name__ == "__main__":
     parser.add_argument('--labels', default=None)
     parser.add_argument('--cats', action="store_true")
     parser.add_argument('--cat', default=None, type=str)
+    parser.add_argument('--size', default=None)
+    parser.add_argument('--mark_images', default=None, )
+    parser.add_argument('--markers', default=None, )
     args = parser.parse_args()
 
     assert 1.0 <= args.lr <= 1000.0
@@ -118,11 +143,32 @@ if __name__ == "__main__":
         cocoGt_data = json.load(json_file)
     cocoGt = COCO(args.json)
 
+    prefix = "dist_"
+    if args.size:
+        assert args.size in SONY_AREA_NAMES
+        prefix = args.size+"_"+prefix
+
     dir, filename = op.split(args.pickled_features)
-    dist_fp = op.join(dir, "dist_"+filename.split(".")[0]+".npy")
+    dist_fp = op.join(dir, prefix+filename.split(".")[0]+".npy")
     y_fp = op.join(dir, "y_"+filename.split(".")[0]+".npy")
     if not (op.exists(dist_fp) and op.exists(y_fp)):
         x, y = read_pickle(args)
+        if args.size:
+            raise NotImplementedErrorplt.savefig(op.join(plot_dir, f"{prefix}_p{perplexity}_lr{int(args.lr)}.png"))
+
+            # x0, y0 = copy.deepcopy(x), copy.deepcopy(y)
+            y = np.array(y)
+            seleted_indices = np.zeros(len(y))
+            area_rng = SONY_AREA_RNG[SONY_AREA_NAMES.index(args.size)]
+            m, M = area_rng
+            for idx, metadata in enumerate(y):
+                ann_id = int(metadata["ori_filename"].split(".")[0])
+                ann = cocoGt.loadAnns([ann_id])[0]
+                if m <= ann["area"] <= M:
+                    seleted_indices[idx] = 1
+            x=np.take(x, np.where(seleted_indices>0))
+            y=list(np.take(y, np.where(seleted_indices>0)))
+            print(len(y))
         print("Calculating distances...")
         scaler = MinMaxScaler()
         x = scaler.fit_transform(x)
@@ -138,7 +184,8 @@ if __name__ == "__main__":
         y = np.load(y_fp, allow_pickle=True)
 
     labels = []
-    perplexities = [args.perplexity] if args.perplexity else [10, 30, 50]
+    # perplexities = [args.perplexity] if args.perplexity else [10, 30, 50]
+    perplexities = [args.perplexity] if args.perplexity else [50]
     if any([args.labels, args.cat]):
         raise NotImplementedError
     if args.binary_label or args.cats:
@@ -151,7 +198,7 @@ if __name__ == "__main__":
                 labels.append(label)
             # convert booleans to text
             label_name = args.binary_label.split("is")[-1]
-            labels = [label_name if label else f"not {label_name}" for label in labels]
+            labels = [label_name if label else f"non-{label_name}" for label in labels]
         if args.cats:
             prefix = "cats"
             for metadata in y:
@@ -165,11 +212,27 @@ if __name__ == "__main__":
         labels_legend = [label for label in labels_unique]
         labels_int = [labels_dict[label] for label in labels]
 
+    if args.mark_images:
+        images = args.mark_images.split(",")
+        markers = args.markers.split(",")
+        assert len(images) == len(markers)
+        images_idx = []
+        images_y = []
+        for idx, metadata in enumerate(y):
+            if not metadata["ori_filename"] in images:
+                continue
+            images_y.append(markers[images.index(metadata["ori_filename"])])
+            images_idx.append(idx)
+
     assert labels
     for perplexity in perplexities:
         tsne = TSNE(learning_rate=args.lr, perplexity=perplexity, metric="precomputed", verbose=True, **TSNE_DEFAULT).fit_transform(dist)
         scatter(tsne, np.array(labels_int), labels_legend, alpha=0.5)
+        if args.mark_images:
+            ax = plt.gca()
+            for idx, marker in zip(images_idx, images_y):
+                pt = tsne[idx]
+                ax.scatter(*pt, marker=marker, color='k', s=300)
         print(op.join(plot_dir, f"{prefix}_p{perplexity}_lr{int(args.lr)}.png"))
         plt.savefig(op.join(plot_dir, f"{prefix}_p{perplexity}_lr{int(args.lr)}.png"))
         plt.savefig(op.join(plot_dir, f"{prefix}_p{perplexity}_lr{int(args.lr)}.svg"))
-    
